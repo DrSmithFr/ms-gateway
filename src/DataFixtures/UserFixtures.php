@@ -7,9 +7,11 @@ namespace App\DataFixtures;
 use App\Entity\Group;
 use App\Entity\User;
 use App\Security\Encoder\UserEncoder;
+use App\Service\UserService;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
+use Exception;
 
 /**
  * Class UserFixtures
@@ -24,15 +26,19 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     public const USER_ADMIN = 'user-admin';
 
     /**
-     * @var UserEncoder
+     * @var UserService
      */
-    private $encoder;
+    private $service;
 
-    public function __construct(UserEncoder $encoder)
+    public function __construct(UserService $service)
     {
-        $this->encoder = $encoder;
+        $this->service = $service;
     }
 
+    /**
+     * @throws Exception
+     * @param ObjectManager $manager
+     */
     public function load(ObjectManager $manager): void
     {
         $dev   = $this->makeUser('dev', 'dev', [GroupFixtures::GROUP_SUPER_ADMIN]);
@@ -50,16 +56,19 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
         $this->addReference(self::USER_ADMIN, $admin);
     }
 
+    /**
+     * @throws Exception
+     * @param string $pass
+     * @param array  $groups
+     * @param string $name
+     * @return User
+     */
     private function makeUser(string $name, string $pass, array $groups = []): User
     {
-        $user = new User();
+        $user = $this->service->createUser();
         $user->setUsername($name);
 
-        $salt = $this->encoder->generateSalt();
-        $user->setSalt($salt);
-
-        $password = $this->encoder->encodePassword($user, $pass);
-        $user->setPassword($password);
+        $this->service->updatePassword($user, $pass);
 
         foreach ($groups as $key) {
             /** @var Group $group */

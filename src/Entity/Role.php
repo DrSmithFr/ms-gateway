@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Traits\BlameableTrait;
+use App\Entity\Traits\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -12,6 +14,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Role
 {
+    use TimestampableTrait;
+    use BlameableTrait;
+
     /**
      * @var int|null
      * @ORM\Id

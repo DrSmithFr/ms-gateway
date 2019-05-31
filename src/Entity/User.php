@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Traits\BlameableTrait;
+use App\Entity\Traits\TimestampableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * @ORM\Entity()
@@ -14,16 +18,27 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class User
 {
+    use TimestampableTrait;
+    use BlameableTrait;
+
     /**
      * @var int|null
      * @ORM\Id
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", unique=true)
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
+     * @var UuidInterface|null
+     * @JMS\Type("string")
+     * @ORM\Column(type="uuid", unique=true)
+     */
+    private $externalId;
+
+    /**
      * @var string|null
+     * @JMS\Type("string")
      * @ORM\Column(type="string", name="username")
      */
     private $username;
@@ -80,6 +95,43 @@ class User
     }
 
     /**
+     * @JMS\VirtualProperty(name="roles")
+     * @JMS\Type("aray<string>")
+     * @return array
+     */
+    public function getNormalizedRoles(): array
+    {
+        $roles = [];
+
+        foreach ($this->groups as $group) {
+            foreach ($group->getRoles() as $role) {
+                $roles[] = $role->getName();
+            }
+        }
+
+        foreach ($this->roles as $role) {
+            $role[] = $role->getName();
+        }
+
+        return array_values(array_unique($roles));
+    }
+
+    /**
+     * @JMS\VirtualProperty(name="groups")
+     * @JMS\Type("aray<string>")
+     * @return array
+     */
+    public function getNormalizedGroups(): array
+    {
+        return array_map(
+            static function (Group $group): string {
+                return $group->getName();
+            },
+            $this->groups
+        );
+    }
+
+    /**
      * @return string|null
      */
     public function getId(): ?string
@@ -94,6 +146,24 @@ class User
     public function setId(?string $id): self
     {
         $this->id = $id;
+        return $this;
+    }
+
+    /**
+     * @return UuidInterface|null
+     */
+    public function getExternalId(): ?UuidInterface
+    {
+        return $this->externalId;
+    }
+
+    /**
+     * @param UuidInterface|null $externalId
+     * @return $this
+     */
+    public function setExternalId(?UuidInterface $externalId): self
+    {
+        $this->externalId = $externalId;
         return $this;
     }
 

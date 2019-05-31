@@ -10,12 +10,10 @@ class UserEncoder
 {
     public function generateSalt(): string
     {
-        return uniqid('sylly-salt-', false);
+        return uniqid(sprintf('%s', mt_rand()), true);
     }
 
     /**
-     * TODO use a real encryption
-     *
      * @param User   $user
      * @param string $pass
      * @return string
@@ -23,9 +21,9 @@ class UserEncoder
     public function encodePassword(User $user, string $pass): string
     {
         if ($user->getSalt()) {
-            return sha1($pass . $user->getSalt());
+            return password_hash($pass, PASSWORD_BCRYPT, ['salt' => $user->getSalt()]);
         }
 
-        return sha1($pass);
+        return password_hash($pass, PASSWORD_BCRYPT);
     }
 }
