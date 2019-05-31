@@ -1,16 +1,12 @@
 version: '3'
 
-volumes:
-  bdd:
-
 services:
   # DATABASE_URL
   database:
-    image: postgres:11-alpine
+    image: postgres:11.3-alpine
     restart: always
     environment:
       POSTGRES_DB: symfony
       POSTGRES_USER: symfony
       POSTGRES_PASSWORD: passwd
-    volumes:
-    - bdd:/var/lib/postgresql/data
+
