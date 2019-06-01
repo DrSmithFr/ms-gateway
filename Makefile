@@ -1,7 +1,11 @@
 log:
 	symfony server:log
 
+bind:
+	symfony proxy:domain:attach ms-gateway
+
 start:
+	symfony proxy:start
 	symfony server:start -d
 	symfony run -d docker-compose up
 

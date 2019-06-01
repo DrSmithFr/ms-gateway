@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Interfaces\SerializableEntity;
 use App\Entity\Traits\BlameableTrait;
 use App\Entity\Traits\TimestampableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -13,10 +14,12 @@ use JMS\Serializer\Annotation as JMS;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * @ORM\Entity()
+ * @JMS\AccessorOrder("custom", custom = {"externalId", "username" ,"normalizedGroups", "normalizedRoles"})
+ * @JMS\ExclusionPolicy("all")
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\Table(name="users")
  */
-class User
+class User implements SerializableEntity
 {
     use TimestampableTrait;
     use BlameableTrait;
@@ -31,6 +34,8 @@ class User
 
     /**
      * @var UuidInterface|null
+     * @JMS\Expose()
+     * @JMS\SerializedName("id")
      * @JMS\Type("string")
      * @ORM\Column(type="uuid", unique=true)
      */
@@ -38,6 +43,7 @@ class User
 
     /**
      * @var string|null
+     * @JMS\Expose()
      * @JMS\Type("string")
      * @ORM\Column(type="string", name="username")
      */
@@ -95,8 +101,10 @@ class User
     }
 
     /**
-     * @JMS\VirtualProperty(name="roles")
-     * @JMS\Type("aray<string>")
+     * @JMS\Expose()
+     * @JMS\VirtualProperty()
+     * @JMS\SerializedName("roles")
+     * @JMS\Type("array<string>")
      * @return array
      */
     public function getNormalizedRoles(): array
@@ -117,8 +125,10 @@ class User
     }
 
     /**
-     * @JMS\VirtualProperty(name="groups")
-     * @JMS\Type("aray<string>")
+     * @JMS\Expose()
+     * @JMS\VirtualProperty()
+     * @JMS\SerializedName("groups")
+     * @JMS\Type("array<string>")
      * @return array
      */
     public function getNormalizedGroups(): array
@@ -127,7 +137,7 @@ class User
             static function (Group $group): string {
                 return $group->getName();
             },
-            $this->groups
+            $this->groups->toArray()
         );
     }
 
@@ -309,5 +319,13 @@ class User
         }
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->getId() ?: 'undefined';
     }
 }

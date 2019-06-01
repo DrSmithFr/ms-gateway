@@ -8,13 +8,13 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 # 4 space indentation
-[*.{php,yml}]
+[*.{php,yml,yaml}]
 charset = utf-8
 indent_style = space
 indent_size = 4
 
 # Indentation override for all JS under lib directory
-[*.{js,json,yaml}]
+[*.{js,json}]
 charset = utf-8
 indent_style = space
 indent_size = 2

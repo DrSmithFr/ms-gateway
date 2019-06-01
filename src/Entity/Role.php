@@ -7,8 +7,10 @@ namespace App\Entity;
 use App\Entity\Traits\BlameableTrait;
 use App\Entity\Traits\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
+ * @JMS\ExclusionPolicy("all")
  * @ORM\Entity()
  * @ORM\Table(name="roles")
  */
