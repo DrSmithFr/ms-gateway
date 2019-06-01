@@ -3,6 +3,7 @@
     "license": "proprietary",
     "require": {
         "php": "~7.3",
+        "ext-json": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "jms/serializer-bundle": "^3.3",

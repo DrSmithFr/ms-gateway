@@ -92,12 +92,19 @@ class User implements SerializableEntity
     private $roles;
 
     /**
+     * @var Collection|Resource[]
+     * @ORM\OneToMany(targetEntity="App\Entity\Resource", mappedBy="users")
+     */
+    private $resources;
+
+    /**
      * User constructor.
      */
     public function __construct()
     {
-        $this->groups = new ArrayCollection();
-        $this->roles  = new ArrayCollection();
+        $this->groups    = new ArrayCollection();
+        $this->roles     = new ArrayCollection();
+        $this->resources = new ArrayCollection();
     }
 
     /**
