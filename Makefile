@@ -7,7 +7,7 @@ bind:
 start:
 	symfony proxy:start
 	symfony server:start -d
-	symfony run -d docker-compose up
+	symfony run -d docker-compose -f docker-compose.yaml -f docker-compose.override.yaml up -d
 
 kill:
 	symfony server:stop
