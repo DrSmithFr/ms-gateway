@@ -6,6 +6,6 @@ volumes:
 services:
   database:
     ports:
-      - "5432"
+      - "5432:5432"
     volumes:
       - bdd:/var/lib/postgresql/data
