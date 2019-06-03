@@ -114,4 +114,17 @@ class Permission
         $this->other = $other;
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s%s%s',
+            $this->user->__toString(),
+            $this->group->__toString(),
+            $this->other->__toString()
+        );
+    }
 }

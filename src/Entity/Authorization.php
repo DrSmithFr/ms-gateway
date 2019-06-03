@@ -102,4 +102,17 @@ class Authorization
         $this->executable = $executable;
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s%s%s',
+            $this->isReadable() ? 'r' : '-',
+            $this->isWritable() ? 'w' : '-',
+            $this->isExecutable() ? 'x' : '-'
+        );
+    }
 }

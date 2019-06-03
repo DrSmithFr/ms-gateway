@@ -61,4 +61,15 @@ class Resource
 
         $this->permission = $permission;
     }
+
+    /**
+     * @return string
+     * @JMS\Expose()
+     * @JMS\Expose("permission")
+     * @JMS\VirtualProperty()
+     */
+    public function getPermissionResume(): string
+    {
+        return $this->permission->__toString();
+    }
 }
