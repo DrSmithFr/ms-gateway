@@ -66,7 +66,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     private function makeUser(string $name, string $pass, array $groups = []): User
     {
         $user = $this->service->createUser();
-        $user->setUsername($name);
+        $user->setEmail($name);
 
         $this->service->updatePassword($user, $pass);
 

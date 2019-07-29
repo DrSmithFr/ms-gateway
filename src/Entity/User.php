@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as JMS;
 use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @JMS\AccessorOrder("custom", custom = {"externalId", "username" ,"normalizedGroups", "normalizedRoles"})
@@ -19,7 +20,7 @@ use Ramsey\Uuid\UuidInterface;
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\Table(name="users")
  */
-class User implements SerializableEntity
+class User implements UserInterface, SerializableEntity
 {
     use TimestampableTrait;
     use BlameableTrait;
@@ -45,9 +46,9 @@ class User implements SerializableEntity
      * @var string|null
      * @JMS\Expose()
      * @JMS\Type("string")
-     * @ORM\Column(type="string", name="username")
+     * @ORM\Column(type="string", name="email")
      */
-    private $username;
+    private $email;
 
     /**
      * @var string|null
@@ -187,18 +188,18 @@ class User implements SerializableEntity
     /**
      * @return string|null
      */
-    public function getUsername(): ?string
+    public function getEmail(): ?string
     {
-        return $this->username;
+        return $this->email;
     }
 
     /**
-     * @param string|null $username
+     * @param string|null $email
      * @return $this
      */
-    public function setUsername(?string $username): self
+    public function setEmail(?string $email): self
     {
-        $this->username = $username;
+        $this->email = $email;
         return $this;
     }
 
@@ -285,11 +286,11 @@ class User implements SerializableEntity
     }
 
     /**
-     * @return Role[]|Collection
+     * @return array|Role[]
      */
-    public function getRoles(): Collection
+    public function getRoles(): array
     {
-        return $this->roles;
+        return $this->roles->toArray();
     }
 
     /**
@@ -334,5 +335,25 @@ class User implements SerializableEntity
     public function getIdentifier(): string
     {
         return $this->getId() ?: 'undefined';
+    }
+
+    /**
+     * Returns the username used to authenticate the user.
+     *
+     * @return string|null The username
+     */
+    public function getUsername(): ?string
+    {
+        return $this->getEmail();
+    }
+
+    /**
+     * Removes sensitive data from the user.
+     * This is important if, at any given point, sensitive information like
+     * the plain-text password is stored on this object.
+     */
+    public function eraseCredentials(): void
+    {
+        // nothing for now
     }
 }
