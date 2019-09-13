@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\User;
+use Ramsey\Uuid\Uuid;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -24,6 +26,9 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+    /**
+     * @return array|User[]
+     */
     public function findAll(): array
     {
         return $this
@@ -39,5 +44,23 @@ class UserRepository extends ServiceEntityRepository
             ->leftJoin('g.roles', 'gr')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @param Uuid $uuid
+     * @return User|null
+     */
+    public function findOneByUuid(Uuid $uuid): ?User
+    {
+        return $this
+            ->getEntityManager()
+            ->createQueryBuilder()
+            ->select('u')
+            ->from(User::class, 'u')
+            ->where('u.uuid = :uuid')
+            ->setParameter('uuid', $uuid)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

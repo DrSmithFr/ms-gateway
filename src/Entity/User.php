@@ -40,21 +40,19 @@ class User implements UserInterface, SerializableEntity
      * @JMS\Type("string")
      * @ORM\Column(type="uuid", unique=true)
      */
-    private $externalId;
-
-    /**
-     * @var string|null
-     * @JMS\Expose()
-     * @JMS\Type("string")
-     * @ORM\Column(type="string", name="email")
-     */
-    private $email;
+    private $uuid;
 
     /**
      * @var string|null
      * @ORM\Column(type="string", name="password")
      */
     private $password;
+
+    /**
+     * Used internally for login and register form
+     * @var string|null
+     */
+    private $plainPassword;
 
     /**
      * @var string|null
@@ -170,36 +168,18 @@ class User implements UserInterface, SerializableEntity
     /**
      * @return UuidInterface|null
      */
-    public function getExternalId(): ?UuidInterface
+    public function getUuid(): ?UuidInterface
     {
-        return $this->externalId;
+        return $this->uuid;
     }
 
     /**
-     * @param UuidInterface|null $externalId
+     * @param UuidInterface|null $uuid
      * @return $this
      */
-    public function setExternalId(?UuidInterface $externalId): self
+    public function setUuid(?UuidInterface $uuid): self
     {
-        $this->externalId = $externalId;
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    /**
-     * @param string|null $email
-     * @return $this
-     */
-    public function setEmail(?string $email): self
-    {
-        $this->email = $email;
+        $this->uuid = $uuid;
         return $this;
     }
 
@@ -218,6 +198,24 @@ class User implements UserInterface, SerializableEntity
     public function setPassword(?string $password): self
     {
         $this->password = $password;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * @param string|null $plainPassword
+     * @return self
+     */
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
         return $this;
     }
 
@@ -344,7 +342,7 @@ class User implements UserInterface, SerializableEntity
      */
     public function getUsername(): ?string
     {
-        return $this->getEmail();
+        return $this->getUuid() ? $this->getUuid()->toString() : null;
     }
 
     /**

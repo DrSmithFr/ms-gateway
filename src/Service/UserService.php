@@ -7,6 +7,7 @@ namespace App\Service;
 use Exception;
 use App\Entity\User;
 use Ramsey\Uuid\Uuid;
+use App\Model\ConnectionModel;
 
 class UserService
 {
@@ -23,28 +24,60 @@ class UserService
 
         $user
             ->setSalt($salt)
-            ->setExternalId($uuid);
+            ->setUuid($uuid);
 
         return $user;
     }
 
-    public function updatePassword(User $user, string $pass): void
+    /**
+     * @param User   $user
+     * @param string $password
+     * @return User
+     */
+    public function updatePassword(User $user, string $password): User
     {
-        $password = $this->encodePassword($user, $pass);
-        $user->setPassword($password);
+        return $user
+            ->setPassword($this->encodePassword($user, $password))
+            ->setPlainPassword(null);
     }
 
+    /**
+     * @return string
+     */
     private function generateSalt(): string
     {
         return uniqid(sprintf('%s', mt_rand()), true);
     }
 
+    /**
+     * @param User   $user
+     * @param string $pass
+     * @return string
+     */
     private function encodePassword(User $user, string $pass): string
     {
         if ($user->getSalt()) {
-            return password_hash($pass, PASSWORD_BCRYPT, ['salt' => $user->getSalt()]);
+            return password_hash($pass, PASSWORD_ARGON2I, ['salt' => $user->getSalt()]);
         }
 
-        return password_hash($pass, PASSWORD_BCRYPT);
+        return password_hash($pass, PASSWORD_ARGON2I);
+    }
+
+    /**
+     * @param User            $user
+     * @param ConnectionModel $co
+     * @return bool
+     */
+    public function checkPasswordCorrectness(User $user, ConnectionModel $co): bool
+    {
+        if ($user->getUuid() !== $co->getUuid()) {
+            return false;
+        }
+
+        if ($user->getPassword() !== $this->encodePassword($user, $co->getPassword())) {
+            return false;
+        }
+
+        return true;
     }
 }

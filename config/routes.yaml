@@ -1,0 +1,3 @@
+app_user_login:
+    path: /users/connect
+    methods: [POST]

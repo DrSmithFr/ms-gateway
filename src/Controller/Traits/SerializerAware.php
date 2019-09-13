@@ -2,10 +2,12 @@
 
 namespace App\Controller\Traits;
 
+use Symfony\Component\Form\FormInterface;
 use App\Entity\Interfaces\SerializableEntity;
 use InvalidArgumentException;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait SerializerAware
@@ -28,6 +30,7 @@ trait SerializerAware
     /**
      * Create serialization context for specifics groups
      * with serialize null field enable
+     *
      * @param array $group
      * @return SerializationContext
      */
@@ -49,8 +52,9 @@ trait SerializerAware
 
     /**
      * Return the json string of the data, serialize for specifics groups
+     *
      * @param SerializableEntity $data
-     * @param array $group
+     * @param array              $group
      * @return string
      */
     private function serialize($data, array $group = ['Default']): string
@@ -66,6 +70,7 @@ trait SerializerAware
 
     /**
      * Return the JsonResponse of the data, serialize for specifics groups
+     *
      * @param mixed $data
      * @param array $group
      * @return JsonResponse
@@ -79,6 +84,7 @@ trait SerializerAware
 
     /**
      * Simple JsonResponse use to transmit a message
+     *
      * @param string $message
      * @param int    $code
      * @return JsonResponse
@@ -88,18 +94,62 @@ trait SerializerAware
         $response = new JsonResponse(
             [
                 'code'    => $code,
-                'message' => $message
+                'message' => $message,
             ],
             $code
         );
-
 
         return $response;
     }
 
     /**
+     * Simple JsonResponse use to transmit a message
+     *
+     * @param FormInterface $form
+     * @param bool          $showReason
+     * @return JsonResponse
+     */
+    private function formErrorResponse(FormInterface $form, bool $showReason = true): JsonResponse
+    {
+        return new JsonResponse(
+            [
+                'code'    => Response::HTTP_NOT_ACCEPTABLE,
+                'message' => 'Invalid form',
+                'reason'  => $showReason ? $this->getFormErrorArray($form) : 'hidden',
+            ],
+            Response::HTTP_NOT_ACCEPTABLE
+        );
+    }
+
+    /**
+     * @param FormInterface $form
+     * @return array
+     */
+    private function getFormErrorArray(FormInterface $form): array
+    {
+        $errors = [];
+
+        // Global
+        foreach ($form->getErrors() as $error) {
+            $errors[$form->getName()][] = $error->getMessage();
+        }
+
+        // Fields
+        foreach ($form as $child) {
+            if (!$child->isValid()) {
+                foreach ($child->getErrors() as $error) {
+                    $errors[$child->getName()][] = $error->getMessage();
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
      * Simple JsonResponse use to transmit the new id of the created entity
-     * @param mixed $entity
+     *
+     * @param mixed  $entity
      * @param string $message
      * @return JsonResponse
      */
