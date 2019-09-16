@@ -7,7 +7,7 @@ namespace App\Enum;
 /**
  * Class OverviewEventEnum
  */
-final class OverviewEventEnum extends Enum
+final class EventEnum extends Enum
 {
     public const SOCIALIZATION = 'social';
     public const ACHIEVEMENT   = 'achievement';

@@ -6,8 +6,8 @@ namespace App\Entity;
 
 use RuntimeException;
 use ReflectionException;
-use App\Enum\OverviewEventEnum;
-use App\Enum\OverviewFeelingEnum;
+use App\Enum\EventEnum;
+use App\Enum\FeelingEnum;
 use App\Entity\Interfaces\SerializableEntity;
 use App\Entity\Traits\BlameableTrait;
 use App\Entity\Traits\TimestampableTrait;
@@ -27,6 +27,8 @@ class Overview implements SerializableEntity
 
     /**
      * @var int|null
+     * @JMS\Expose()
+     * @JMS\Type("integer")
      * @ORM\Id
      * @ORM\Column(type="integer", unique=true)
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -35,6 +37,8 @@ class Overview implements SerializableEntity
 
     /**
      * @var integer|null
+     * @JMS\Expose()
+     * @JMS\Type("integer")
      * @ORM\Column(type="integer", name="mood")
      * @Assert\LessThanOrEqual(10)
      * @Assert\GreaterThanOrEqual(0)
@@ -43,18 +47,24 @@ class Overview implements SerializableEntity
 
     /**
      * @var array|string[]
+     * @JMS\Expose()
+     * @JMS\Type("array<string>")
      * @ORM\Column(type="json_array", name="feelings")
      */
     private $feelings;
 
     /**
      * @var array|string[]
+     * @JMS\Expose()
+     * @JMS\Type("array<string>")
      * @ORM\Column(type="json_array", name="events")
      */
     private $events;
 
     /**
      * @var string|null
+     * @JMS\Expose()
+     * @JMS\Type("string")
      * @ORM\Column(type="text", name="note")
      */
     private $note;
@@ -136,7 +146,7 @@ class Overview implements SerializableEntity
      */
     public function addFeeling(string $feeling): self
     {
-        if (!OverviewFeelingEnum::isValidValue($feeling)) {
+        if (!FeelingEnum::isValidValue($feeling)) {
             throw new RuntimeException('invalid feeling');
         }
 
@@ -186,7 +196,7 @@ class Overview implements SerializableEntity
      */
     public function addEvent(string $event): self
     {
-        if (!OverviewEventEnum::isValidValue($event)) {
+        if (!EventEnum::isValidValue($event)) {
             throw new RuntimeException('invalid event');
         }
 

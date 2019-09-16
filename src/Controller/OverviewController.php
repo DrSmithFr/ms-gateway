@@ -54,10 +54,10 @@ class OverviewController extends AbstractController
      * @param Overview $overview
      * @return JsonResponse
      */
-    public function one(Overview $overview): Response
+    public function one(Overview $overview): JsonResponse
     {
         if ($overview->getUser() !== $this->getUser()) {
-            return new Response('', Response::HTTP_FORBIDDEN);
+            return $this->messageResponse('access denied', Response::HTTP_FORBIDDEN);
         }
 
         return $this->serializeResponse($overview);
@@ -73,11 +73,15 @@ class OverviewController extends AbstractController
         Request $request,
         EntityManagerInterface $manager
     ): JsonResponse {
-        return $this->update(new Overview(), $request, $manager);
+        return $this->update(
+            (new Overview())->setUser($this->getUser()),
+            $request,
+            $manager
+        );
     }
 
     /**
-     * @Route(path="", methods={"PUT"}, name="user_overviews_update")
+     * @Route(path="/{id}", methods={"PUT", "PATCH"}, name="user_overviews_update")
      * @param Overview               $overview
      * @param Request                $request
      * @param EntityManagerInterface $manager
@@ -88,6 +92,10 @@ class OverviewController extends AbstractController
         Request $request,
         EntityManagerInterface $manager
     ): JsonResponse {
+        if ($overview->getUser() !== $this->getUser()) {
+            return $this->messageResponse('access denied', Response::HTTP_FORBIDDEN);
+        }
+
         $form = $this
             ->createForm(OverviewType::class, $overview)
             ->submit($request->request->all());

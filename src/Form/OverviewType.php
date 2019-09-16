@@ -3,16 +3,16 @@
 namespace App\Form;
 
 use App\Entity\Overview;
-use App\Enum\OverviewEventEnum;
-use App\Enum\OverviewFeelingEnum;
-use App\Validator\Constraints\isEnum;
+use App\Enum\EventEnum;
+use ReflectionException;
+use App\Enum\FeelingEnum;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class OverviewType extends AbstractType
 {
@@ -20,8 +20,9 @@ class OverviewType extends AbstractType
      * $option parameter is mandatory but not used
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
-     * @param FormBuilderInterface $builder
+     * @throws ReflectionException
      * @param array                $options
+     * @param FormBuilderInterface $builder
      */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -30,9 +31,8 @@ class OverviewType extends AbstractType
                 'mood',
                 IntegerType::class,
                 [
-                    'required'      => true,
-                    'property_path' => 'externalId',
-                    'constraints'   => [
+                    'required'    => true,
+                    'constraints' => [
                         new Assert\GreaterThanOrEqual(['value' => 0]),
                         new Assert\LessThanOrEqual(['value' => 10]),
                     ],
@@ -40,31 +40,21 @@ class OverviewType extends AbstractType
             )
             ->add(
                 'feelings',
-                CollectionType::class,
+                ChoiceType::class,
                 [
-                    'entry_type'  => TextType::class,
-                    'constraints' => [
-                        new isEnum(),
-                    ],
-                ]
-            )
-            ->add(
-                'feelings',
-                CollectionType::class,
-                [
-                    'entry_type'  => TextType::class,
-                    'constraints' => [
-                        new isEnum(['class' => OverviewFeelingEnum::class]),
+                    'multiple' => true,
+                    'choices'  => [
+                        FeelingEnum::getAll(),
                     ],
                 ]
             )
             ->add(
                 'events',
-                CollectionType::class,
+                ChoiceType::class,
                 [
-                    'entry_type'  => TextType::class,
-                    'constraints' => [
-                        new isEnum(['class' => OverviewEventEnum::class]),
+                    'multiple' => true,
+                    'choices'  => [
+                        EventEnum::getAll(),
                     ],
                 ]
             )

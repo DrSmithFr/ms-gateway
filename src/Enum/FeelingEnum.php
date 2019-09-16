@@ -7,7 +7,7 @@ namespace App\Enum;
 /**
  * Class OverviewFeelingEnum
  */
-final class OverviewFeelingEnum extends Enum
+final class FeelingEnum extends Enum
 {
     /**
      * Distraction feelings

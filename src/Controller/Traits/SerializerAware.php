@@ -131,14 +131,14 @@ trait SerializerAware
 
         // Global
         foreach ($form->getErrors() as $error) {
-            $errors[$form->getName()][] = $error->getMessage();
+            $errors[$form->getName()][$error->getOrigin()->getName()][] = $error->getMessage();
         }
 
         // Fields
         foreach ($form as $child) {
             if (!$child->isValid()) {
                 foreach ($child->getErrors() as $error) {
-                    $errors[$child->getName()][] = $error->getMessage();
+                    $errors[$form->getName()][$child->getName()][] = $error->getMessage();
                 }
             }
         }

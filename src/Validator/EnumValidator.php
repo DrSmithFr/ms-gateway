@@ -3,7 +3,7 @@
 namespace App\Validator;
 
 use App\Enum\Enum;
-use App\Validator\Constraints\isEnum;
+use App\Validator\Constraints\IsEnum;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -21,8 +21,8 @@ class EnumValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint): void
     {
-        if (!$constraint instanceof isEnum) {
-            throw new UnexpectedTypeException($constraint, isEnum::class);
+        if (!$constraint instanceof IsEnum) {
+            throw new UnexpectedTypeException($constraint, IsEnum::class);
         }
 
         // custom constraints should ignore null and empty values to allow

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Exception;
+use RuntimeException;
 use App\Form\RegisterType;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
