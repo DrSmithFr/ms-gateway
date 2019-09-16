@@ -97,6 +97,12 @@ class User implements UserInterface, SerializableEntity
     private $resources;
 
     /**
+     * @var Collection|Overview[]
+     * @ORM\OneToMany(targetEntity="App\Entity\Overview", mappedBy="users")
+     */
+    private $overviews;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -104,6 +110,7 @@ class User implements UserInterface, SerializableEntity
         $this->groups    = new ArrayCollection();
         $this->roles     = new ArrayCollection();
         $this->resources = new ArrayCollection();
+        $this->overviews = new ArrayCollection();
     }
 
     /**
@@ -353,5 +360,41 @@ class User implements UserInterface, SerializableEntity
     public function eraseCredentials(): void
     {
         // nothing for now
+    }
+
+    /**
+     * @return Collection|Resource[]
+     */
+    public function getResources(): Collection
+    {
+        return $this->resources;
+    }
+
+    /**
+     * @param Collection|Resource[] $resources
+     * @return self
+     */
+    public function setResources(Collection $resources): self
+    {
+        $this->resources = $resources;
+        return $this;
+    }
+
+    /**
+     * @return Overview[]|Collection
+     */
+    public function getOverviews(): Collection
+    {
+        return $this->overviews;
+    }
+
+    /**
+     * @param Overview[]|Collection $overviews
+     * @return self
+     */
+    public function setOverviews(Collection $overviews): self
+    {
+        $this->overviews = $overviews;
+        return $this;
     }
 }

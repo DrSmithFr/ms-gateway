@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Model\RegistrationModel;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -25,7 +26,10 @@ class RegisterType extends AbstractType
                 'password',
                 PasswordType::class,
                 [
-                    'required' => true
+                    'required' => true,
+                    'constraints' => [
+                        new Length(['min' => 4])
+                    ]
                 ]
             );
     }

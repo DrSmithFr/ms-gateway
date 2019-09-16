@@ -6,6 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
+        "doctrine/annotations": "^1.7",
         "jms/serializer-bundle": "^3.3",
         "lexik/jwt-authentication-bundle": "^2.6",
         "ramsey/uuid-doctrine": "^1.5",
@@ -16,6 +17,7 @@
         "symfony/framework-bundle": "4.3.*",
         "symfony/orm-pack": "^1.0",
         "symfony/security-bundle": "4.3.*",
+        "symfony/validator": "4.3.*",
         "symfony/yaml": "4.3.*"
     },
     "config": {

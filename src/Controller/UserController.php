@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Exception;
-use App\Form\LoginType;
 use App\Form\RegisterType;
 use App\Service\UserService;
-use App\Model\ConnectionModel;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Model\RegistrationModel;
-use App\Repository\UserRepository;
 use App\Controller\Traits\SerializerAware;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Request;

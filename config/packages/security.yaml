@@ -13,18 +13,21 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            stateless: true
-            anonymous: true
-            json_login:
-                check_path:      /users/connect
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-
         login:
             pattern:  ^/users/connect$
             stateless: true
             anonymous: true
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
+        main:
+            json_login:
+                check_path:      /users/connect
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            stateless: true
+            anonymous: false
+            provider: users
             guard:
                 authenticators:
                     - lexik_jwt_authentication.jwt_token_authenticator
