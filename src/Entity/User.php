@@ -116,12 +116,6 @@ class User implements UserInterface, SerializableEntity
     private $transferPassword;
 
     /**
-     * @var DateTime|null
-     * @ORM\Column(type="datetime", name="request_transfer_at", nullable=true)
-     */
-    private $requestTransferAt;
-
-    /**
      * User constructor.
      */
     public function __construct()
@@ -452,25 +446,6 @@ class User implements UserInterface, SerializableEntity
     public function setTransferPassword(?string $transferPassword): self
     {
         $this->transferPassword = $transferPassword;
-        return $this;
-    }
-
-    /**
-     * @return DateTime|null
-     */
-    public function getRequestTransferAt(): ?DateTime
-    {
-        return $this->requestTransferAt;
-    }
-
-    /**
-     * @param DateTime|null $requestTransferAt
-     *
-     * @return self
-     */
-    public function setRequestTransferAt(?DateTime $requestTransferAt): self
-    {
-        $this->requestTransferAt = $requestTransferAt;
         return $this;
     }
 }

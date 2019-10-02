@@ -7,13 +7,18 @@ namespace App\Controller;
 use Exception;
 use App\Entity\User;
 use RuntimeException;
+use App\Form\TransferType;
+use App\Model\TransferModel;
 use App\Form\OnlyPasswordType;
 use App\Service\UserService;
 use App\Service\AccountTransferManager;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Model\PasswordModel;
+use App\Exception\UserNotFoundException;
 use App\Controller\Traits\SerializerAware;
 use JMS\Serializer\SerializerInterface;
+use App\Exception\TransferPayloadException;
+use App\Exception\TransferPasswordException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -91,22 +96,22 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route(path="/transfer/request", methods={"POST"}, name="public_users_transfer_request")
+     * @Route(path="/transfer", methods={"POST"}, name="public_users_transfer")
      * @throws JWTEncodeFailureException
      *
-     * @param AccountTransferManager $transferManager
      * @param KernelInterface        $kernel
+     * @param AccountTransferManager $transferManager
      * @param Request                $request
      *
      * @return JsonResponse
      */
     public function transferRequest(
         Request $request,
-        AccountTransferManager $transferManager,
-        KernelInterface $kernel
+        KernelInterface $kernel,
+        AccountTransferManager $transferManager
     ): JsonResponse {
         $form = $this
-            ->createForm(OnlyPasswordType::class, $pass = new PasswordModel())
+            ->createForm(OnlyPasswordType::class, $model = new PasswordModel())
             ->submit($request->request->all());
 
         if (!($form->isSubmitted() && $form->isValid())) {
@@ -115,12 +120,54 @@ class UserController extends AbstractController
 
         /** @var User $user */
         $user  = $this->getUser();
-        $token = $transferManager->generateTransferToken($user, $pass);
+        $token = $transferManager->generateTransferToken($user, $model);
 
         return $this->json(
             [
                 'token' => $token,
             ]
         );
+    }
+
+    /**
+     * @Route(path="/recover", methods={"POST"}, name="public_users_recover")
+     * @param Request                $request
+     * @param KernelInterface        $kernel
+     * @param AccountTransferManager $transferManager
+     *
+     * @return JsonResponse
+     */
+    public function transfer(
+        Request $request,
+        KernelInterface $kernel,
+        AccountTransferManager $transferManager
+    ): JsonResponse {
+        $form = $this
+            ->createForm(TransferType::class, $model = new TransferModel())
+            ->submit($request->request->all());
+
+        if (!($form->isSubmitted() && $form->isValid())) {
+            return $this->formErrorResponse($form, $kernel->isDebug());
+        }
+
+        try {
+            $user = $transferManager->verifyTransfer($model);
+
+            return new JsonResponse(
+                [
+                    'uuid' => $user->getUuid()
+                ]
+            );
+        } catch (TransferPasswordException|TransferPayloadException|UserNotFoundException $e) {
+            return $this->messageResponse(
+                'transfer invalid',
+                Response::HTTP_NOT_ACCEPTABLE
+            );
+        } catch (JWTDecodeFailureException $e) {
+            return $this->messageResponse(
+                'transfer token outdated',
+                Response::HTTP_REQUEST_TIMEOUT
+            );
+        }
     }
 }

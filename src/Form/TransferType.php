@@ -2,16 +2,14 @@
 
 namespace App\Form;
 
-use App\Model\PasswordModel;
+use App\Model\TransferModel;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-class TransferRequestType extends AbstractType
+class TransferType extends AbstractType
 {
     /**
      * $option parameter is mandatory but not used
@@ -24,25 +22,17 @@ class TransferRequestType extends AbstractType
     {
         $builder
             ->add(
-                'target',
-                EntityType::class,
+                'token',
+                TextType::class,
                 [
                     'required' => true,
-
                 ]
             )
             ->add(
-                'target_password',
+                'password',
                 PasswordType::class,
                 [
-                    'required' => true
-                ]
-            )
-            ->add(
-                'transfer_password',
-                PasswordType::class,
-                [
-                    'required' => true
+                    'required' => true,
                 ]
             );
     }
@@ -54,7 +44,7 @@ class TransferRequestType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class'      => PasswordModel::class,
+                'data_class'      => TransferModel::class,
                 'csrf_protection' => false,
             ]
         );

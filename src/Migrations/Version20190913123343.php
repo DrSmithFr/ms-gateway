@@ -33,7 +33,6 @@ final class Version20190913123343 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('CREATE SCHEMA public');
         $this->addSql('DROP INDEX UNIQ_1483A5E9D17F50A6');
         $this->addSql('ALTER TABLE users ADD email VARCHAR(255) NOT NULL');
         $this->addSql('ALTER TABLE users RENAME COLUMN uuid TO external_id');
