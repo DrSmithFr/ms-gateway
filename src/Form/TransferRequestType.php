@@ -2,15 +2,16 @@
 
 namespace App\Form;
 
-use App\Model\RegistrationModel;
+use App\Model\PasswordModel;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-class RegisterType extends AbstractType
+class TransferRequestType extends AbstractType
 {
     /**
      * $option parameter is mandatory but not used
@@ -23,13 +24,25 @@ class RegisterType extends AbstractType
     {
         $builder
             ->add(
-                'password',
-                PasswordType::class,
+                'target',
+                EntityType::class,
                 [
                     'required' => true,
-                    'constraints' => [
-                        new Length(['min' => 4])
-                    ]
+
+                ]
+            )
+            ->add(
+                'target_password',
+                PasswordType::class,
+                [
+                    'required' => true
+                ]
+            )
+            ->add(
+                'transfer_password',
+                PasswordType::class,
+                [
+                    'required' => true
                 ]
             );
     }
@@ -41,7 +54,7 @@ class RegisterType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class'      => RegistrationModel::class,
+                'data_class'      => PasswordModel::class,
                 'csrf_protection' => false,
             ]
         );

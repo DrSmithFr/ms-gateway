@@ -6,12 +6,12 @@ namespace App\Controller;
 
 use Exception;
 use App\Entity\Overview;
-use App\Form\RegisterType;
+use App\Form\OnlyPasswordType;
 use App\Form\OverviewType;
 use App\Service\UserService;
 use App\Repository\OverviewRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Model\RegistrationModel;
+use App\Model\PasswordModel;
 use App\Controller\Traits\SerializerAware;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Request;

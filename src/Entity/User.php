@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use DateTime;
 use App\Entity\Interfaces\SerializableEntity;
 use App\Entity\Traits\BlameableTrait;
 use App\Entity\Traits\TimestampableTrait;
@@ -101,6 +102,24 @@ class User implements UserInterface, SerializableEntity
      * @ORM\OneToMany(targetEntity="App\Entity\Overview", mappedBy="users")
      */
     private $overviews;
+
+    /**
+     * @var UuidInterface|null
+     * @ORM\Column(type="uuid", name="transfer_uuid", nullable=true)
+     */
+    private $transferUuid;
+
+    /**
+     * @var string|null
+     * @ORM\Column(type="string", name="transfer_password", nullable=true)
+     */
+    private $transferPassword;
+
+    /**
+     * @var DateTime|null
+     * @ORM\Column(type="datetime", name="request_transfer_at", nullable=true)
+     */
+    private $requestTransferAt;
 
     /**
      * User constructor.
@@ -395,6 +414,63 @@ class User implements UserInterface, SerializableEntity
     public function setOverviews(Collection $overviews): self
     {
         $this->overviews = $overviews;
+        return $this;
+    }
+
+    /**
+     * @return UuidInterface|null
+     */
+    public function getTransferUuid(): ?UuidInterface
+    {
+        return $this->transferUuid;
+    }
+
+    /**
+     * @param UuidInterface|null $transferUuid
+     *
+     * @return self
+     */
+    public function setTransferUuid(?UuidInterface $transferUuid): self
+    {
+        $this->transferUuid = $transferUuid;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTransferPassword(): ?string
+    {
+        return $this->transferPassword;
+    }
+
+    /**
+     * @param string|null $transferPassword
+     *
+     * @return self
+     */
+    public function setTransferPassword(?string $transferPassword): self
+    {
+        $this->transferPassword = $transferPassword;
+        return $this;
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getRequestTransferAt(): ?DateTime
+    {
+        return $this->requestTransferAt;
+    }
+
+    /**
+     * @param DateTime|null $requestTransferAt
+     *
+     * @return self
+     */
+    public function setRequestTransferAt(?DateTime $requestTransferAt): self
+    {
+        $this->requestTransferAt = $requestTransferAt;
         return $this;
     }
 }
