@@ -13,11 +13,18 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
+        register:
+            pattern: ^/users/register$
+            security: false
+        connect:
+            pattern:  ^/users/connect$
+            stateless: true
+            anonymous: true
             json_login:
-                check_path:      /users/connect
+                check_path: /users/connect
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        main:
             stateless: true
             anonymous: false
             provider: users
@@ -26,6 +33,6 @@ security:
                     - lexik_jwt_authentication.jwt_token_authenticator
 
     access_control:
-        - { path: ^/users/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/users/connect,  roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/,               roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/users/register$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/users/connect$,  roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/,                roles: IS_AUTHENTICATED_FULLY }

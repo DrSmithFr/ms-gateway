@@ -25,9 +25,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\LcobucciJWTEncoder;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 
@@ -96,7 +93,7 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route(path="/transfer", methods={"POST"}, name="public_users_transfer")
+     * @Route(path="/transfer", methods={"POST"}, name="private_users_transfer")
      * @throws JWTEncodeFailureException
      *
      * @param KernelInterface        $kernel
@@ -130,7 +127,7 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route(path="/recover", methods={"POST"}, name="public_users_recover")
+     * @Route(path="/recover", methods={"POST"}, name="private_users_recover")
      * @param Request                $request
      * @param KernelInterface        $kernel
      * @param AccountTransferManager $transferManager

@@ -1,4 +1,4 @@
-app_user_login:
+public_users_connect:
     path: /users/connect
     methods: [POST]
 
