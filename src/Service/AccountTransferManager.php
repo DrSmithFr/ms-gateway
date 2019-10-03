@@ -1,20 +1,21 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Model\TransferModel;
 use DateTime;
 use Exception;
 use App\Entity\User;
 use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use App\Model\PasswordModel;
-use App\Model\TransferModel;
+use App\Model\RecoverModel;
 use App\Repository\UserRepository;
 use App\Exception\UserNotFoundException;
-use App\Exception\TransferPayloadException;
-use App\Exception\TransferPasswordException;
+use App\Exception\InvalidPayloadException;
+use App\Exception\BadPasswordException;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
@@ -22,8 +23,9 @@ use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 
 class AccountTransferManager
 {
-    private const TTL_IN_SECONDS  = 10*60;
+    private const TTL_IN_SECONDS = 10 * 60 * 1000;
     private const PAYLOAD_ACCOUNT = 'account';
+    private const PAYLOAD_SALT = 'salt';
 
     /**
      * @var JWTEncoderInterface
@@ -31,52 +33,69 @@ class AccountTransferManager
     private $encoder;
 
     /**
-     * @var EncoderFactoryInterface|null
+     * @var EncoderFactoryInterface
      */
     private $encoderFactory;
 
     /**
-     * @var UserRepository|null
+     * @var UserRepository
      */
     private $userRepository;
 
     /**
+     * @var UserService
+     */
+    private $userService;
+
+    /**
      * AccountTransferManager constructor.
      *
-     * @param JWTEncoderInterface     $encoder
+     * @param JWTEncoderInterface $encoder
      * @param EncoderFactoryInterface $encoderFactory
-     * @param UserRepository          $userRepository
+     * @param UserRepository $userRepository
+     * @param UserService $userService
      */
     public function __construct(
         JWTEncoderInterface $encoder,
         EncoderFactoryInterface $encoderFactory,
-        UserRepository $userRepository
-    ) {
-        $this->encoder        = $encoder;
+        UserRepository $userRepository,
+        UserService $userService
+    )
+    {
+        $this->encoder = $encoder;
         $this->encoderFactory = $encoderFactory;
         $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     /**
-     * @throws JWTEncodeFailureException
-     * @throws Exception
-     *
-     * @param PasswordModel $form
-     * @param User          $user
+     * @param TransferModel $form
+     * @param User $user
      *
      * @return string
+     * @throws Exception
+     *
+     * @throws JWTEncodeFailureException
+     * @throws BadPasswordException
      */
-    public function generateTransferToken(User $user, PasswordModel $form): string
+    public function generateTransferToken(User $user, TransferModel $form): string
     {
-        $encoder  = $this->encoderFactory->getEncoder($user);
-        $password = $encoder->encodePassword($form->getPassword(), $user->getSalt());
+        $encoder = $this->encoderFactory->getEncoder($user);
+
+        if (!$this->userService->checkPassword($user, $form->getPassword())) {
+            throw new BadPasswordException();
+        }
+
+        $salt = $this->userService->generateSalt();
+        $passphrase = $encoder->encodePassword($form->getPassword(), $salt . $user->getSalt());
 
         $user
             ->setTransferUuid(Uuid::uuid4())
-            ->setTransferPassword($password);
+            ->setTransferPassword($passphrase);
 
         $payload = [
-            'exp'                 => self::TTL_IN_SECONDS,
+            'exp' => time() + self::TTL_IN_SECONDS,
+            self::PAYLOAD_SALT => $salt,
             self::PAYLOAD_ACCOUNT => $user->getTransferUuid()->toString(),
         ];
 
@@ -84,33 +103,25 @@ class AccountTransferManager
     }
 
     /**
-     * @throws JWTDecodeFailureException
-     *
-     * @param string $token
-     *
-     * @return array
-     */
-    public function verifyTransferToken(string $token): array
-    {
-        return $this->encoder->decode($token);
-    }
-
-    /**
-     * @throws JWTDecodeFailureException
-     * @throws TransferPayloadException
-     * @throws UserNotFoundException
-     * @throws TransferPasswordException
-     *
-     * @param TransferModel $model
+     * @param RecoverModel $model
      *
      * @return User
+     * @throws UserNotFoundException
+     * @throws BadPasswordException
+     *
+     * @throws JWTDecodeFailureException
+     * @throws InvalidPayloadException
      */
-    public function verifyTransfer(TransferModel $model): User
+    public function verifyTransfer(RecoverModel $model): User
     {
         $payload = $this->encoder->decode($model->getToken());
 
         if (!$uuid = $payload[self::PAYLOAD_ACCOUNT] ?? null) {
-            throw new TransferPayloadException('bad payload format', 1);
+            throw new InvalidPayloadException('bad payload format', 1);
+        }
+
+        if (!$salt = $payload[self::PAYLOAD_SALT] ?? null) {
+            throw new InvalidPayloadException('bad payload format', 1);
         }
 
         /** @var User $user */
@@ -118,11 +129,11 @@ class AccountTransferManager
             throw new UserNotFoundException();
         }
 
-        $encoder  = $this->encoderFactory->getEncoder($user);
-        $password = $encoder->encodePassword($model->getPassword(), $user->getSalt());
+        $encoder = $this->encoderFactory->getEncoder($user);
+        $password = $encoder->encodePassword($model->getPassphrase(), $salt . $user->getSalt());
 
         if ($password !== $user->getTransferPassword()) {
-            throw new TransferPasswordException();
+            throw new BadPasswordException();
         }
 
         return $user;

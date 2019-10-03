@@ -6,12 +6,12 @@ namespace App\Exception;
 
 use Exception;
 
-class TransferPayloadException extends Exception
+class InvalidPayloadException extends Exception
 {
     /**
      * @var string|null
      */
-    protected $message = 'bad payload';
+    protected $message = 'invalid payload';
 
     /**
      * @var int|null

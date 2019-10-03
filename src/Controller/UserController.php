@@ -1,14 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Controller;
 
-use Exception;
-use App\Entity\User;
-use RuntimeException;
 use App\Form\TransferType;
 use App\Model\TransferModel;
+use Exception;
+use App\Entity\User;
+use App\Form\RecoverType;
+use App\Model\RecoverModel;
 use App\Form\OnlyPasswordType;
 use App\Service\UserService;
 use App\Service\AccountTransferManager;
@@ -17,8 +18,8 @@ use App\Model\PasswordModel;
 use App\Exception\UserNotFoundException;
 use App\Controller\Traits\SerializerAware;
 use JMS\Serializer\SerializerInterface;
-use App\Exception\TransferPayloadException;
-use App\Exception\TransferPasswordException;
+use App\Exception\InvalidPayloadException;
+use App\Exception\BadPasswordException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -47,21 +48,22 @@ class UserController extends AbstractController
 
     /**
      * @Route(path="/register", methods={"POST"}, name="public_users_register")
-     * @throws Exception
-     *
-     * @param UserService            $userService
+     * @param UserService $userService
      * @param EntityManagerInterface $entityManager
-     * @param KernelInterface        $kernel
-     * @param Request                $request
+     * @param KernelInterface $kernel
+     * @param Request $request
      *
      * @return JsonResponse
+     * @throws Exception
+     *
      */
     public function register(
         Request $request,
         UserService $userService,
         EntityManagerInterface $entityManager,
         KernelInterface $kernel
-    ): JsonResponse {
+    ): JsonResponse
+    {
         $form = $this
             ->createForm(OnlyPasswordType::class, $reg = new PasswordModel())
             ->submit($request->request->all());
@@ -94,42 +96,50 @@ class UserController extends AbstractController
 
     /**
      * @Route(path="/transfer", methods={"POST"}, name="private_users_transfer")
-     * @throws JWTEncodeFailureException
+     * @param Request $request
      *
-     * @param KernelInterface        $kernel
+     * @param KernelInterface $kernel
      * @param AccountTransferManager $transferManager
-     * @param Request                $request
-     *
+     * @param EntityManagerInterface $manager
      * @return JsonResponse
+     * @throws Exception
      */
     public function transferRequest(
         Request $request,
         KernelInterface $kernel,
-        AccountTransferManager $transferManager
-    ): JsonResponse {
+        AccountTransferManager $transferManager,
+        EntityManagerInterface $manager
+    ): JsonResponse
+    {
         $form = $this
-            ->createForm(OnlyPasswordType::class, $model = new PasswordModel())
+            ->createForm(TransferType::class, $model = new TransferModel())
             ->submit($request->request->all());
 
         if (!($form->isSubmitted() && $form->isValid())) {
             return $this->formErrorResponse($form, $kernel->isDebug());
         }
 
-        /** @var User $user */
-        $user  = $this->getUser();
-        $token = $transferManager->generateTransferToken($user, $model);
+        try {
+            $token = $transferManager->generateTransferToken($this->getUser(), $model);
+            $manager->flush();
 
-        return $this->json(
-            [
-                'token' => $token,
-            ]
-        );
+            return $this->json(
+                [
+                    'token' => $token,
+                ]
+            );
+        } catch (JWTEncodeFailureException|BadPasswordException $e) {
+            return $this->messageResponse(
+                'transfer invalid: ' . $e->getMessage(),
+                Response::HTTP_NOT_ACCEPTABLE
+            );
+        }
     }
 
     /**
      * @Route(path="/recover", methods={"POST"}, name="private_users_recover")
-     * @param Request                $request
-     * @param KernelInterface        $kernel
+     * @param Request $request
+     * @param KernelInterface $kernel
      * @param AccountTransferManager $transferManager
      *
      * @return JsonResponse
@@ -138,9 +148,10 @@ class UserController extends AbstractController
         Request $request,
         KernelInterface $kernel,
         AccountTransferManager $transferManager
-    ): JsonResponse {
+    ): JsonResponse
+    {
         $form = $this
-            ->createForm(TransferType::class, $model = new TransferModel())
+            ->createForm(RecoverType::class, $model = new RecoverModel())
             ->submit($request->request->all());
 
         if (!($form->isSubmitted() && $form->isValid())) {
@@ -155,14 +166,14 @@ class UserController extends AbstractController
                     'uuid' => $user->getUuid()
                 ]
             );
-        } catch (TransferPasswordException|TransferPayloadException|UserNotFoundException $e) {
+        } catch (BadPasswordException|InvalidPayloadException|UserNotFoundException $e) {
             return $this->messageResponse(
-                'transfer invalid',
+                'recover invalid: ' . $e->getMessage(),
                 Response::HTTP_NOT_ACCEPTABLE
             );
         } catch (JWTDecodeFailureException $e) {
             return $this->messageResponse(
-                'transfer token outdated',
+                'recover outdated',
                 Response::HTTP_REQUEST_TIMEOUT
             );
         }

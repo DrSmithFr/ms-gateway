@@ -2,16 +2,14 @@
 
 namespace App\Form;
 
-use App\Model\PasswordModel;
-use App\Model\TransferModel;
+use App\Model\RecoverModel;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-class TransferType extends AbstractType
+class RecoverType extends AbstractType
 {
     /**
      * $option parameter is mandatory but not used
@@ -24,13 +22,10 @@ class TransferType extends AbstractType
     {
         $builder
             ->add(
-                'password',
-                PasswordType::class,
+                'token',
+                TextType::class,
                 [
                     'required' => true,
-                    'constraints' => [
-                        new Length(['min' => 4])
-                    ]
                 ]
             )
             ->add(
@@ -38,9 +33,6 @@ class TransferType extends AbstractType
                 PasswordType::class,
                 [
                     'required' => true,
-                    'constraints' => [
-                        new Length(['min' => 4])
-                    ]
                 ]
             );
     }
@@ -52,7 +44,7 @@ class TransferType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class'      => TransferModel::class,
+                'data_class'      => RecoverModel::class,
                 'csrf_protection' => false,
             ]
         );

@@ -44,7 +44,7 @@ class UserService
     /**
      * @return string
      */
-    private function generateSalt(): string
+    public function generateSalt(): string
     {
         return uniqid(sprintf('%s', mt_rand()), true);
     }
@@ -64,17 +64,13 @@ class UserService
     }
 
     /**
-     * @param User            $user
-     * @param ConnectionModel $co
+     * @param User $user
+     * @param string $password
      * @return bool
      */
-    public function checkPasswordCorrectness(User $user, ConnectionModel $co): bool
+    public function checkPassword(User $user, string $password): bool
     {
-        if ($user->getUuid() !== $co->getUuid()) {
-            return false;
-        }
-
-        if ($user->getPassword() !== $this->encodePassword($user, $co->getPassword())) {
+        if ($user->getPassword() !== $this->encodePassword($user, $password)) {
             return false;
         }
 

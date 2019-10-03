@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Model;
 
-class TransferModel
+class RecoverModel
 {
     /**
      * @var string|null
      */
-    private $password;
+    private $token;
 
     /**
      * @var string|null
@@ -19,18 +19,19 @@ class TransferModel
     /**
      * @return string|null
      */
-    public function getPassword(): ?string
+    public function getToken(): ?string
     {
-        return $this->password;
+        return $this->token;
     }
 
     /**
-     * @param string|null $password
+     * @param string|null $token
+     *
      * @return self
      */
-    public function setPassword(?string $password): self
+    public function setToken(?string $token): self
     {
-        $this->password = $password;
+        $this->token = $token;
         return $this;
     }
 
@@ -44,9 +45,11 @@ class TransferModel
 
     /**
      * @param string|null $passphrase
+     * @return self
      */
-    public function setPassphrase(?string $passphrase): void
+    public function setPassphrase(?string $passphrase): self
     {
         $this->passphrase = $passphrase;
+        return $this;
     }
 }

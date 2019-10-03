@@ -6,7 +6,7 @@ namespace App\Exception;
 
 use Exception;
 
-class TransferPasswordException extends Exception
+class BadPasswordException extends Exception
 {
     /**
      * @var string|null
