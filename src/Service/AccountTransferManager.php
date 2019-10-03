@@ -5,21 +5,20 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Model\TransferModel;
-use DateTime;
 use Exception;
 use App\Entity\User;
 use Ramsey\Uuid\Uuid;
-use RuntimeException;
-use App\Model\PasswordModel;
 use App\Model\RecoverModel;
 use App\Repository\UserRepository;
 use App\Exception\UserNotFoundException;
 use App\Exception\InvalidPayloadException;
 use App\Exception\BadPasswordException;
+use Symfony\Component\Security\Core\Encoder\Argon2iPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
+use Symfony\Component\Security\Core\Encoder\SodiumPasswordEncoder;
 
 class AccountTransferManager
 {
@@ -80,14 +79,14 @@ class AccountTransferManager
      */
     public function generateTransferToken(User $user, TransferModel $form): string
     {
-        $encoder = $this->encoderFactory->getEncoder($user);
-
         if (!$this->userService->checkPassword($user, $form->getPassword())) {
             throw new BadPasswordException();
         }
 
         $salt = $this->userService->generateSalt();
-        $passphrase = $encoder->encodePassword($form->getPassword(), $salt . $user->getSalt());
+        $superSalt = $salt . $user->getSalt();
+        $encoder = $this->encoderFactory->getEncoder($user);
+        $passphrase = $encoder->encodePassword($form->getPassphrase(), $superSalt);
 
         $user
             ->setTransferUuid(Uuid::uuid4())
@@ -129,10 +128,16 @@ class AccountTransferManager
             throw new UserNotFoundException();
         }
 
+        $superSalt = $salt . $user->getSalt();
         $encoder = $this->encoderFactory->getEncoder($user);
-        $password = $encoder->encodePassword($model->getPassphrase(), $salt . $user->getSalt());
 
-        if ($password !== $user->getTransferPassword()) {
+        $isPasswordValid = $encoder->isPasswordValid(
+            $user->getTransferPassword(),
+            $model->getPassphrase(),
+            $superSalt
+        );
+
+        if (!$isPasswordValid) {
             throw new BadPasswordException();
         }
 
