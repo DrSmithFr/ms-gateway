@@ -116,6 +116,13 @@ class User implements UserInterface, SerializableEntity
     private $transferPassword;
 
     /**
+     * Used to send encrypted data to user
+     * @var string|null
+     * @ORM\Column(type="text", name="public_gpg", nullable=true)
+     */
+    private $publicGpg;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -446,6 +453,25 @@ class User implements UserInterface, SerializableEntity
     public function setTransferPassword(?string $transferPassword): self
     {
         $this->transferPassword = $transferPassword;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPublicGpg(): ?string
+    {
+        return $this->publicGpg;
+    }
+
+    /**
+     * @param string|null $publicGpg
+     *
+     * @return self
+     */
+    public function setPublicGpg(?string $publicGpg): self
+    {
+        $this->publicGpg = $publicGpg;
         return $this;
     }
 }

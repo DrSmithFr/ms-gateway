@@ -185,6 +185,15 @@
     "ocramius/proxy-manager": {
         "version": "2.2.2"
     },
+    "pear/console_commandline": {
+        "version": "v1.2.2"
+    },
+    "pear/crypt_gpg": {
+        "version": "v1.6.3"
+    },
+    "pear/pear_exception": {
+        "version": "v1.0.1"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },
