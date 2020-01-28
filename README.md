@@ -22,7 +22,7 @@ Execute the following commands:
     openssl rsa -in config/jwt/private.pem -out config/jwt/private2.pem
     
     mv config/jwt/private2.pem config/jwt/private.pem
-    chmod 777 config/jwt/*
+    chmod 700 config/jwt/*
 
 ## Coding style and Standards
 
