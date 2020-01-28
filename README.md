@@ -1,6 +1,6 @@
 # Gateway
 
-Simple gateway micro service
+ Simple gateway micro service
 
 ## Installation
 
